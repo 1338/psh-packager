@@ -14,3 +14,8 @@ For example:
 ```bash
 git clone git://link.to/repo.git project
 ./build symfony toolchain
+```
+
+### Symfony requirements
+- symfony/filesystem
+- symfony/finder
