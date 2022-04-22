@@ -12,6 +12,5 @@ git clone <project> project
 
 For example:
 ```bash
-cd .
 git clone symfony project
 ./build symfony toolchain
