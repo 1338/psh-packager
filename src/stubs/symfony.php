@@ -12,7 +12,7 @@ $fs = new Filesystem();
 
 $finder = new Finder();
 
-$finder->files()->in(__DIR__ . '/Command');
+$finder->files()->in(__DIR__ . '/{{NAMESPACEDIR}}Command');
 
 $toLoad = [];
 
@@ -22,7 +22,7 @@ foreach($finder as $file) {
 }
 
 foreach ($toLoad as $class) {
-  $className = "Command\\$class";
+  $className = "{{NAMESPACE}}Command\\$class";
   $application->add(new $className());
 }
 
