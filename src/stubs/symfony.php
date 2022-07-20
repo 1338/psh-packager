@@ -6,7 +6,7 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
-$application = new Application('CS Console', '0.0.1-dev');
+$application = new Application('{{PSH_NAME}}', '0.0.1-dev');
 
 $fs = new Filesystem();
 

@@ -1,2 +1,2 @@
 #!/bin/sh
-/usr/bin/env php -d phar.readonly=false ./builder.php "$@"
+/usr/bin/env php -d phar.readonly=false ./src/builder.php "$@"

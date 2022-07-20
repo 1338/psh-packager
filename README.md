@@ -7,7 +7,7 @@ Package composer cli applications into a PSH
 ## How to use
 ```bash
 git clone <project> project
-./build <stub type> <project name>
+./build <stub type> <project name> <location path>
 ```
 
 For example:
