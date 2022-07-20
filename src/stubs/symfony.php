@@ -12,7 +12,7 @@ $fs = new Filesystem();
 
 $finder = new Finder();
 
-$finder->files()->in(__DIR__ . '/Command');
+$finder->files()->in(__DIR__ . '/{{NAMESPACEDIR}}Command');
 
 $toLoad = [];
 

@@ -78,7 +78,9 @@ class builder
             $stubData = file_get_contents(__DIR__ . "/stubs/symfony.php");
             // Give template name of application
             $stubData = preg_replace("/\{\{PSH_NAME}}/", $this->pshName, $stubData);
-            $stubData = preg_replace("/\{\{NAMESPACE}}/", $this->getProjectNamespace(), $stubData);
+            $autoLoad = $this->getProjectAutoLoad();
+            $stubData = preg_replace("/\{\{NAMESPACE}}/", $autoLoad['namespace'], $stubData);
+            $stubData = preg_replace("/\{\{NAMESPACEDIR}}/", $autoLoad['dir'], $stubData);
             file_put_contents("$this->location/$this->pshName", $stubData);
         } else {
             echo "Unknown stub type: $this->stubType\n";
@@ -87,15 +89,22 @@ class builder
 
     }
 
-    private function getProjectNamespace() {
-        $namespace = '';
+    private function getProjectAutoLoad() {
+        $namespace = [
+            'namespace' => '',
+            'dir' => ''
+        ];
         // Get PSR-4 namespace from from composer
         if(file_exists("$this->location/composer.json")) {
             $composer = json_decode(file_get_contents("$this->location/composer.json"), true);
             if(isset($composer['autoload']['psr-4']) && empty($composer['autoload']['psr-4']) === false) {
                 reset($composer['autoload']['psr-4']);
-                $namespace = key($composer['autoload']['psr-4']);
-                $namespace = preg_replace('/\\\\/','\\\\\\\\', $namespace);
+                $autoLoadKey = key($composer['autoload']['psr-4']);
+                $dir = $composer['autoload']['psr-4'][$autoLoadKey];
+                $namespace = [
+                        'namespace' => preg_replace('/\\\\/','\\\\\\\\', $autoLoadKey),
+                        'dir' => $dir
+                ];
             }
         }
         return $namespace;
