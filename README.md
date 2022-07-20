@@ -13,7 +13,7 @@ git clone <project> project
 For example:
 ```bash
 git clone git://link.to/repo.git project
-./build symfony toolchain
+./build symfony toolchain /path/to/ToolChain
 ```
 
 ### Symfony requirements
