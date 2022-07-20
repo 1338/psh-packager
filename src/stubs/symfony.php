@@ -22,7 +22,7 @@ foreach($finder as $file) {
 }
 
 foreach ($toLoad as $class) {
-  $className = "Command\\$class";
+  $className = "{{NAMESPACE}}Command\\$class";
   $application->add(new $className());
 }
 

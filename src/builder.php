@@ -7,41 +7,100 @@ if(isset($argv[1]) === false || isset($argv[2]) === false || isset($argv[3]) ===
 
 list($file, $type, $pshName, $location) = $argv;
 
-// The php.ini setting phar.readonly must be set to 0
-$pharFile = $pshName.'.phar';
+class builder
+{
+    /**
+     * @var string
+     */
+    private $stubType;
 
-// clean up
-if (file_exists($pharFile)) {
-    unlink($pharFile);
+    /**
+     * @var string
+     */
+    private $pshName;
+
+    /**
+     * @var string
+     */
+    private $location;
+
+    /**
+     * @var string
+     */
+    private $pharFile;
+
+    /**
+     * @var Phar
+     */
+    private $p;
+
+    /**
+     * @param string $stubType
+     * @param string $pshName
+     * @param string $location
+     */
+    public function __construct($stubType, $pshName, $location)
+    {
+        $this->stubType = $stubType;
+        $this->pshName = $pshName;
+        $this->pharFile = $pshName.'.phar';
+        $this->location = $location;
+    }
+
+    public function build() {
+        $this->clean();
+        $this->buildStub();
+        $this->buildPhar();
+    }
+
+    private function buildPhar() {
+        $this->p = new Phar($this->pharFile);
+        $this->p->buildFromDirectory("$this->location/");
+        $defaultStub = Phar::createDefaultStub("/$this->pshName", "/$this->pshName");
+        $stub = "#!/usr/bin/env php \n".$defaultStub;
+        $this->p->setStub($stub);
+        chmod(__DIR__ . "/../$this->pharFile",0775);
+
+        unlink("$this->location/$this->pshName");
+        rename(__DIR__ . "/../$this->pharFile", $this->pshName);
+        echo "$this->pshName successfully created";
+    }
+
+    private function clean() {
+        if (file_exists($this->pharFile)) {
+            unlink($this->pharFile);
+        }
+    }
+
+    private function buildStub() {
+        // pointing main file which requires all classes
+        if($this->stubType === 'symfony') {
+            $stubData = file_get_contents(__DIR__ . "/stubs/symfony.php");
+            // Give template name of application
+            $stubData = preg_replace("/\{\{PSH_NAME}}/", $this->pshName, $stubData);
+            $stubData = preg_replace("/\{\{NAMESPACE}}/", $this->getProjectNamespace(), $stubData);
+            file_put_contents("$this->location/$this->pshName", $stubData);
+        } else {
+            echo "Unknown stub type: $this->stubType\n";
+            exit(1);
+        }
+
+    }
+
+    private function getProjectNamespace() {
+        $namespace = '';
+        // Get PSR-4 namespace from from composer
+        if(file_exists("$this->location/composer.json")) {
+            $composer = json_decode(file_get_contents("$this->location/composer.json"), true);
+            if(isset($composer['autoload']['psr-4']) && empty($composer['autoload']['psr-4']) === false) {
+                reset($composer['autoload']['psr-4']);
+                $namespace = key($composer['autoload']['psr-4']);
+                $namespace = preg_replace('/\\\\/','\\\\\\\\', $namespace);
+            }
+        }
+        return $namespace;
+    }
 }
 
-// create phar
-$p = new Phar($pharFile);
-
-// pointing main file which requires all classes
-if($type === 'symfony') {
-    $stubData = file_get_contents(__DIR__ . "/stubs/symfony.php");
-    // Give template name of application
-    $stubData = preg_replace("/\{\{PSH_NAME}}/", $pshName, $stubData);
-    file_put_contents("$location/$pshName", $stubData);
-} else {
-    echo "Unknown stub type: $type\n";
-    exit(1);
-}
-// creating our library using whole directory  
-$p->buildFromDirectory("$location/");
-
-
-$defaultStub = $p::createDefaultStub("/$pshName", "/$pshName");
-
-// Create a custom stub to add the shebang
-$stub = "#!/usr/bin/env php \n".$defaultStub;
-
-// Add the stub
-$p->setStub($stub);
-
-chmod(__DIR__ . "/../$pharFile",0775);
-
-unlink("$location/$pshName");
-rename(__DIR__ . "/../$pharFile", $pshName);
-echo "$pshName successfully created";
+$builder = new builder($type, $pshName, $location);
+$builder->build();
