@@ -16,6 +16,6 @@ git clone git://link.to/repo.git project
 ./build symfony toolchain /path/to/ToolChain
 ```
 
-### Symfony requirements
+### Symfony target requirements
 - symfony/filesystem
 - symfony/finder
